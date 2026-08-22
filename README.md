@@ -1,4 +1,4 @@
-# KDE Control Center
+# Control Center by DregosZ
 
 A modern, highly customizable, and modular Control Center widget for **KDE Plasma 6**. Designed with a beautiful "Liquid Glass" aesthetic, this widget brings a unified dashboard for all your quick actions, media controls, and system sliders right to your Plasma panel.
 
