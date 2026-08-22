@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
+      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
+  <kcfgfile name=""/>
+  
+  <group name="General">
+    <entry name="moduleOrder" type="String">
+      <default>media,toggles,sliders,tray</default>
+    </entry>
+    <entry name="showMedia" type="Bool">
+      <default>true</default>
+    </entry>
+    <entry name="showToggles" type="Bool">
+      <default>true</default>
+    </entry>
+    <entry name="showSliders" type="Bool">
+      <default>true</default>
+    </entry>
+    <entry name="showTray" type="Bool">
+      <default>true</default>
+    </entry>
+    <entry name="togglesOrder" type="String">
+      <default>wifi,bluetooth,darkmode,home,screenshot,record,monitor,archdrop</default>
+    </entry>
+    <entry name="glassStyle" type="String">
+      <default>glossy</default>
+    </entry>
+    <entry name="glassColor" type="String">
+      <default>none</default>
+    </entry>
+    <entry name="panelIcon" type="String">
+      <default>view-grid</default>
+    </entry>
+    <entry name="widgetWidth" type="Int">
+      <default>340</default>
+    </entry>
+    <entry name="widgetHeight" type="Int">
+      <default>0</default>
+    </entry>
+    <entry name="sizePreset" type="String">
+      <default>default</default>
+    </entry>
+    <entry name="tintStyle" type="String">
+      <default>vibrant</default>
+    </entry>
+  </group>
+</kcfg>
