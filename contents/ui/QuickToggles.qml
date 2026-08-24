@@ -167,8 +167,8 @@ GridLayout {
                         width: Kirigami.Units.iconSizes.medium
                         height: width
                         source: model.icon
-                        isMask: true // Forces the icon to be completely flat/monochrome
-                        color: (isActive || mouseArea.pressed) ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor
+                        isMask: model.icon.endsWith("-symbolic")
+                        color: (isMask && (isActive || mouseArea.pressed)) ? Kirigami.Theme.highlightedTextColor : (isMask ? Kirigami.Theme.textColor : "transparent")
                     }
                     
                     MouseArea {
