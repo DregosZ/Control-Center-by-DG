@@ -210,6 +210,13 @@ Item {
                         border.color: root.cfg_glassColor === modelData.value ? Kirigami.Theme.highlightColor : Kirigami.Theme.textColor
                         border.width: root.cfg_glassColor === modelData.value ? 2 : 1
                         
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        scale: (root.cfg_glassColor === modelData.value || colorMouseArea.containsMouse) ? 1.1 : 1.0
+                        
+                        Controls.ToolTip.visible: colorMouseArea.containsMouse
+                        Controls.ToolTip.text: modelData.name
+                        Controls.ToolTip.delay: 100
+                        
                         Kirigami.Icon {
                             anchors.centerIn: parent
                             source: modelData.value === "none" ? "list-remove" : "dialog-ok"
@@ -220,23 +227,10 @@ Item {
                         }
                         
                         MouseArea {
+                            id: colorMouseArea
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: root.cfg_glassColor = modelData.value
-                            
-                            Controls.ToolTip.visible: containsMouse
-                            Controls.ToolTip.text: modelData.name
-                        }
-                        
-                        // Add a subtle scale animation on hover/selection
-                        Behavior on scale { NumberAnimation { duration: 150 } }
-                        scale: (root.cfg_glassColor === modelData.value || hoverArea.containsMouse) ? 1.1 : 1.0
-                        
-                        MouseArea {
-                            id: hoverArea
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.NoButton
                         }
                     }
                 }
