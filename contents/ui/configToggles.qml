@@ -10,6 +10,7 @@ Item {
     id: root
 
     property string cfg_togglesOrder: ""
+    property int cfg_togglesColumns: 5
     property bool _initialized: false
 
     Component.onCompleted: initModel()
@@ -136,6 +137,16 @@ Item {
                 onClicked: addDialog.open()
             }
             
+            Item { width: Kirigami.Units.largeSpacing }
+            
+            Controls.Label { text: "Columns:" }
+            Controls.SpinBox {
+                from: 3
+                to: 8
+                value: cfg_togglesColumns
+                onValueChanged: cfg_togglesColumns = value
+            }
+            
             Item { Layout.fillWidth: true }
             
             Controls.Button {
@@ -162,7 +173,7 @@ Item {
             Layout.minimumHeight: Kirigami.Units.gridUnit * 15
             interactive: false
             
-            cellWidth: width / 4
+            cellWidth: width / cfg_togglesColumns
             cellHeight: Kirigami.Units.gridUnit * 5
             
             model: ListModel {

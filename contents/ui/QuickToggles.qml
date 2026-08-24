@@ -7,7 +7,7 @@ import org.kde.plasma.plasma5support as Plasma5Support
 GridLayout {
     id: quickToggles
     Layout.fillWidth: true
-    columns: 5
+    columns: plasmoid.configuration.togglesColumns || 5
     rowSpacing: Kirigami.Units.largeSpacing * 1.5
     columnSpacing: Kirigami.Units.smallSpacing // Will be distributed evenly by fillWidth
 
