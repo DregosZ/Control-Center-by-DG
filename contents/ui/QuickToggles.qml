@@ -39,30 +39,62 @@ GridLayout {
 
         function populateModel() {
             toggleModel.clear()
-            let orderStr = plasmoid.configuration.togglesOrder || "wifi:1,bluetooth:1,darkmode:1,home:1,screenshot:1,record:1,monitor:1,archdrop:1"
-            let order = orderStr.split(",")
+            let confStr = plasmoid.configuration.togglesOrder
+            let configArray = []
             
-            let dict = {
-                "wifi": { name: "WiFi", icon: "network-wireless-symbolic", cmdToggle: "sh -c 'nmcli radio wifi | grep -q enabled && nmcli radio wifi off || nmcli radio wifi on'", cmdSettings: "kcmshell6 kcm_networkmanagement", cmdCheck: "sh -c 'nmcli radio wifi | grep -q enabled && echo 1 || echo 0'" },
-                "bluetooth": { name: "Bluetooth", icon: "network-bluetooth-symbolic", cmdToggle: "sh -c 'rfkill list bluetooth | grep -q \"Soft blocked: yes\" && rfkill unblock bluetooth || rfkill block bluetooth'", cmdSettings: "kcmshell6 kcm_bluetooth", cmdCheck: "sh -c 'rfkill list bluetooth | grep -q \"Soft blocked: yes\" && echo 0 || echo 1'" },
-                "darkmode": { name: "Dark Mode", icon: "contrast-symbolic", cmdToggle: "sh -c 'kreadconfig6 --group General --key ColorScheme | grep -q Dark && plasma-apply-lookandfeel -a org.kde.breeze.desktop || plasma-apply-lookandfeel -a org.kde.breezedark.desktop'", cmdSettings: "kcmshell6 kcm_colors", cmdCheck: "sh -c 'kreadconfig6 --group General --key ColorScheme | grep -q Dark && echo 1 || echo 0'" },
-                "home": { name: "266_Home", icon: "network-wired-symbolic", cmdToggle: "sh -c 'nmcli connection show --active | grep -q 266_Home && nmcli connection down 266_Home || nmcli connection up 266_Home'", cmdSettings: "kcmshell6 kcm_networkmanagement", cmdCheck: "sh -c 'nmcli connection show --active | grep -q 266_Home && echo 1 || echo 0'" },
-                "screenshot": { name: "Screenshot", icon: "camera-photo-symbolic", cmdToggle: "spectacle", cmdSettings: "", cmdCheck: "echo 0" },
-                "record": { name: "Record", icon: "media-record-symbolic", cmdToggle: "spectacle -R r", cmdSettings: "", cmdCheck: "sh -c 'pgrep -x spectacle > /dev/null && echo 1 || echo 0'" },
-                "monitor": { name: "Monitor", icon: "video-display-symbolic", cmdToggle: "qdbus6 org.kde.kglobalaccel /component/org_kde_kscreen_desktop invokeShortcut 'ShowOSD'", cmdSettings: "kcmshell6 kcm_kscreen", cmdCheck: "echo 0" },
-                "archdrop": { name: "ArchDrop", icon: "document-send-symbolic", cmdToggle: "archdrop", cmdSettings: "", cmdCheck: "sh -c 'pgrep -x archdrop > /dev/null && echo 1 || echo 0'" }
+            try {
+                // If it looks like JSON, parse it
+                if (confStr && confStr.trim().startsWith("[")) {
+                    configArray = JSON.parse(confStr)
+                } else {
+                    // Fallback default if completely messed up or migrating from old string
+                    configArray = [
+                        {"id":"wifi","type":"system","name":"WiFi","icon":"network-wireless-symbolic","enabled":true},
+                        {"id":"bluetooth","type":"system","name":"Bluetooth","icon":"preferences-system-bluetooth","enabled":true},
+                        {"id":"darkmode","type":"system","name":"Dark Mode","icon":"weather-clear-night","enabled":true},
+                        {"id":"home","type":"system","name":"266_Home","icon":"network-server-symbolic","enabled":true},
+                        {"id":"screenshot","type":"system","name":"Screenshot","icon":"camera-photo-symbolic","enabled":true},
+                        {"id":"record","type":"system","name":"Record","icon":"media-record-symbolic","enabled":true},
+                        {"id":"monitor","type":"system","name":"Monitor","icon":"video-display-symbolic","enabled":true},
+                        {"id":"archdrop","type":"system","name":"ArchDrop","icon":"document-send-symbolic","enabled":false}
+                    ]
+                }
+            } catch (e) {
+                console.warn("Failed to parse togglesOrder JSON:", e)
+                return
             }
             
-            for (let i = 0; i < order.length; ++i) {
-                let parts = order[i].split(":")
-                let id = parts[0].trim()
-                let isEnabled = parts.length > 1 ? (parts[1] === "1") : true
-                let customIcon = parts.length > 2 ? parts[2].trim() : ""
-                
-                if (dict[id] && isEnabled) {
-                    let itemData = dict[id]
-                    if (customIcon !== "") itemData.icon = customIcon
-                    toggleModel.append(itemData)
+            let systemDict = {
+                "wifi": { cmdToggle: "sh -c 'nmcli radio wifi | grep -q enabled && nmcli radio wifi off || nmcli radio wifi on'", cmdSettings: "kcmshell6 kcm_networkmanagement", cmdCheck: "sh -c 'nmcli radio wifi | grep -q enabled && echo 1 || echo 0'" },
+                "bluetooth": { cmdToggle: "sh -c 'rfkill list bluetooth | grep -q \"Soft blocked: yes\" && rfkill unblock bluetooth || rfkill block bluetooth'", cmdSettings: "kcmshell6 kcm_bluetooth", cmdCheck: "sh -c 'rfkill list bluetooth | grep -q \"Soft blocked: yes\" && echo 0 || echo 1'" },
+                "darkmode": { cmdToggle: "sh -c 'kreadconfig6 --group General --key ColorScheme | grep -q Dark && plasma-apply-lookandfeel -a org.kde.breeze.desktop || plasma-apply-lookandfeel -a org.kde.breezedark.desktop'", cmdSettings: "kcmshell6 kcm_colors", cmdCheck: "sh -c 'kreadconfig6 --group General --key ColorScheme | grep -q Dark && echo 1 || echo 0'" },
+                "home": { cmdToggle: "sh -c 'nmcli connection show --active | grep -q 266_Home && nmcli connection down 266_Home || nmcli connection up 266_Home'", cmdSettings: "kcmshell6 kcm_networkmanagement", cmdCheck: "sh -c 'nmcli connection show --active | grep -q 266_Home && echo 1 || echo 0'" },
+                "screenshot": { cmdToggle: "spectacle", cmdSettings: "", cmdCheck: "echo 0" },
+                "record": { cmdToggle: "spectacle -R r", cmdSettings: "", cmdCheck: "sh -c 'pgrep -x spectacle > /dev/null && echo 1 || echo 0'" },
+                "monitor": { cmdToggle: "qdbus6 org.kde.kglobalaccel /component/org_kde_kscreen_desktop invokeShortcut 'ShowOSD'", cmdSettings: "kcmshell6 kcm_kscreen", cmdCheck: "echo 0" },
+                "archdrop": { cmdToggle: "archdrop", cmdSettings: "", cmdCheck: "sh -c 'pgrep -x archdrop > /dev/null && echo 1 || echo 0'" }
+            }
+            
+            for (let i = 0; i < configArray.length; ++i) {
+                let item = configArray[i]
+                if (item.enabled !== false) {
+                    let entry = {
+                        "id": item.id,
+                        "type": item.type || "system",
+                        "name": item.name,
+                        "icon": item.icon || "application-x-executable",
+                        "cmdToggle": item.cmdToggle || "",
+                        "cmdSettings": item.cmdSettings || "",
+                        "cmdCheck": item.cmdCheck || "echo 0"
+                    }
+                    
+                    if (entry.type === "system" && systemDict[entry.id]) {
+                        entry.cmdToggle = systemDict[entry.id].cmdToggle
+                        entry.cmdSettings = systemDict[entry.id].cmdSettings
+                        entry.cmdCheck = systemDict[entry.id].cmdCheck
+                    }
+                    
+                    toggleModel.append(entry)
                 }
             }
         }

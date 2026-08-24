@@ -1,49 +1,46 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<kcfg xmlns="http://www.kde.org/standards/kcfg/1.0"
-      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-      xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0
-      http://www.kde.org/standards/kcfg/1.0/kcfg.xsd" >
-  <kcfgfile name=""/>
+<?xml version='1.0' encoding='UTF-8'?>
+<ns0:kcfg xmlns:ns0="http://www.kde.org/standards/kcfg/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.kde.org/standards/kcfg/1.0       http://www.kde.org/standards/kcfg/1.0/kcfg.xsd">
+  <ns0:kcfgfile name="" />
   
-  <group name="General">
-    <entry name="moduleOrder" type="String">
-      <default>media,toggles,sliders,tray</default>
-    </entry>
-    <entry name="showMedia" type="Bool">
-      <default>true</default>
-    </entry>
-    <entry name="showToggles" type="Bool">
-      <default>true</default>
-    </entry>
-    <entry name="showSliders" type="Bool">
-      <default>true</default>
-    </entry>
-    <entry name="showTray" type="Bool">
-      <default>true</default>
-    </entry>
-    <entry name="togglesOrder" type="String">
-      <default>wifi,bluetooth,darkmode,home,screenshot,record,monitor,archdrop</default>
-    </entry>
-    <entry name="glassStyle" type="String">
-      <default>glossy</default>
-    </entry>
-    <entry name="glassColor" type="String">
-      <default>none</default>
-    </entry>
-    <entry name="panelIcon" type="String">
-      <default>view-grid</default>
-    </entry>
-    <entry name="widgetWidth" type="Int">
-      <default>340</default>
-    </entry>
-    <entry name="widgetHeight" type="Int">
-      <default>0</default>
-    </entry>
-    <entry name="sizePreset" type="String">
-      <default>default</default>
-    </entry>
-    <entry name="tintStyle" type="String">
-      <default>vibrant</default>
-    </entry>
-  </group>
-</kcfg>
+  <ns0:group name="General">
+    <ns0:entry name="moduleOrder" type="String">
+      <ns0:default>media,toggles,sliders,tray</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="showMedia" type="Bool">
+      <ns0:default>true</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="showToggles" type="Bool">
+      <ns0:default>true</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="showSliders" type="Bool">
+      <ns0:default>true</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="showTray" type="Bool">
+      <ns0:default>true</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="togglesOrder" type="String">
+      <ns0:default>[{"id": "wifi", "type": "system", "name": "WiFi", "icon": "network-wireless-symbolic", "enabled": true}, {"id": "bluetooth", "type": "system", "name": "Bluetooth", "icon": "preferences-system-bluetooth", "enabled": true}, {"id": "darkmode", "type": "system", "name": "Dark Mode", "icon": "weather-clear-night", "enabled": true}, {"id": "home", "type": "system", "name": "266_Home", "icon": "network-server-symbolic", "enabled": true}, {"id": "screenshot", "type": "system", "name": "Screenshot", "icon": "camera-photo-symbolic", "enabled": true}, {"id": "record", "type": "system", "name": "Record", "icon": "media-record-symbolic", "enabled": true}, {"id": "monitor", "type": "system", "name": "Monitor", "icon": "video-display-symbolic", "enabled": true}, {"id": "archdrop", "type": "system", "name": "ArchDrop", "icon": "document-share-symbolic", "enabled": false}]</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="glassStyle" type="String">
+      <ns0:default>glossy</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="glassColor" type="String">
+      <ns0:default>none</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="panelIcon" type="String">
+      <ns0:default>view-grid</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="widgetWidth" type="Int">
+      <ns0:default>340</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="widgetHeight" type="Int">
+      <ns0:default>0</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="sizePreset" type="String">
+      <ns0:default>default</ns0:default>
+    </ns0:entry>
+    <ns0:entry name="tintStyle" type="String">
+      <ns0:default>vibrant</ns0:default>
+    </ns0:entry>
+  </ns0:group>
+</ns0:kcfg>

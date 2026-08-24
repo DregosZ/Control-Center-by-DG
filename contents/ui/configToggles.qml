@@ -4,15 +4,34 @@ import QtQuick.Layouts
 import QtQuick.Dialogs
 import org.kde.plasma.components as PlasmaComponents
 import org.kde.kirigami as Kirigami
+import org.kde.plasma.plasma5support as Plasma5Support
 
 Item {
     id: root
 
-    property string cfg_togglesOrder: "wifi:1,bluetooth:1,darkmode:1,home:1,screenshot:1,record:1,monitor:1,archdrop:1"
+    property string cfg_togglesOrder: ""
     property bool _initialized: false
 
     Component.onCompleted: initModel()
     onCfg_togglesOrderChanged: initModel()
+
+    Plasma5Support.DataSource {
+        id: cmdRunner
+        engine: "executable"
+        connectedSources: []
+        onNewData: (sourceName, data) => {
+            let output = data["stdout"]
+            if (output) {
+                let lines = output.trim().split("---")
+                if (lines.length >= 3) {
+                    addNameField.text = lines[0].trim()
+                    addIconField.text = lines[1].trim()
+                    addCmdField.text = lines[2].trim()
+                }
+            }
+            disconnectSource(sourceName)
+        }
+    }
 
     FileDialog {
         id: iconDialog
@@ -21,7 +40,6 @@ Item {
         property int targetIndex: -1
         onAccepted: {
             if (targetIndex !== -1) {
-                // Remove file:// prefix if present to make it cleaner, though QUrl works
                 let urlStr = selectedFile.toString();
                 if (urlStr.startsWith("file://")) urlStr = urlStr.substring(7);
                 listModel.setProperty(targetIndex, "icon", urlStr);
@@ -30,65 +48,78 @@ Item {
         }
     }
 
+    FileDialog {
+        id: desktopAppDialog
+        title: "Select an Application"
+        currentFolder: "file:///usr/share/applications"
+        nameFilters: ["Desktop Files (*.desktop)"]
+        onAccepted: {
+            let path = selectedFile.toString()
+            if (path.startsWith("file://")) path = path.substring(7)
+            let cmd = "grep '^Name=' '" + path + "' | head -n1 | cut -d= -f2- && echo '---' && grep '^Icon=' '" + path + "' | head -n1 | cut -d= -f2- && echo '---' && grep '^Exec=' '" + path + "' | head -n1 | cut -d= -f2- | sed -E 's/ %[uUfFcC]//g'"
+            cmdRunner.connectSource(cmd)
+        }
+    }
+
+    function getDefaultJSON() {
+        return [
+            {"id":"wifi","type":"system","name":"WiFi","icon":"network-wireless-symbolic","enabled":true},
+            {"id":"bluetooth","type":"system","name":"Bluetooth","icon":"preferences-system-bluetooth","enabled":true},
+            {"id":"darkmode","type":"system","name":"Dark Mode","icon":"weather-clear-night","enabled":true},
+            {"id":"home","type":"system","name":"266_Home","icon":"network-server-symbolic","enabled":true},
+            {"id":"screenshot","type":"system","name":"Screenshot","icon":"camera-photo-symbolic","enabled":true},
+            {"id":"record","type":"system","name":"Record","icon":"media-record-symbolic","enabled":true},
+            {"id":"monitor","type":"system","name":"Monitor","icon":"video-display-symbolic","enabled":true},
+            {"id":"archdrop","type":"system","name":"ArchDrop","icon":"document-send-symbolic","enabled":false}
+        ]
+    }
+
     function initModel() {
         if (!_initialized) {
             _initialized = true
+            listModel.clear()
             
-            let orderStr = (cfg_togglesOrder === "") ? "wifi:1,bluetooth:1,darkmode:1,home:1,screenshot:1,record:1,monitor:1,archdrop:1" : cfg_togglesOrder
-            let order = orderStr.split(",")
-            
-            let dict = {
-                "wifi": { name: "WiFi", icon: "network-wireless-symbolic" },
-                "bluetooth": { name: "Bluetooth", icon: "network-bluetooth-symbolic" },
-                "darkmode": { name: "Dark Mode", icon: "contrast-symbolic" },
-                "home": { name: "266_Home", icon: "network-wired-symbolic" },
-                "screenshot": { name: "Screenshot", icon: "camera-photo-symbolic" },
-                "record": { name: "Record", icon: "media-record-symbolic" },
-                "monitor": { name: "Monitor", icon: "video-display-symbolic" },
-                "archdrop": { name: "ArchDrop", icon: "document-send-symbolic" }
+            let configArray = []
+            if (cfg_togglesOrder && cfg_togglesOrder.trim().startsWith("[")) {
+                try {
+                    configArray = JSON.parse(cfg_togglesOrder)
+                } catch(e) {
+                    configArray = getDefaultJSON()
+                }
+            } else {
+                configArray = getDefaultJSON()
             }
             
-            let added = {}
-            for (let i = 0; i < order.length; ++i) {
-                let parts = order[i].split(":")
-                let id = parts[0].trim()
-                let isEnabled = parts.length > 1 ? (parts[1] === "1") : true
-                let customIcon = parts.length > 2 ? parts[2].trim() : ""
-                
-                if (dict[id]) {
-                    listModel.append({ 
-                        id: id, 
-                        name: dict[id].name, 
-                        icon: customIcon !== "" ? customIcon : dict[id].icon, 
-                        defaultIcon: dict[id].icon,
-                        isEnabled: isEnabled 
-                    })
-                    added[id] = true
-                }
-            }
-            
-            for (let key in dict) {
-                if (!added[key]) {
-                    listModel.append({ 
-                        id: key, 
-                        name: dict[key].name, 
-                        icon: dict[key].icon, 
-                        defaultIcon: dict[key].icon,
-                        isEnabled: false 
-                    })
-                }
+            for (let i = 0; i < configArray.length; ++i) {
+                let item = configArray[i]
+                listModel.append({
+                    id: item.id || ("custom_" + Date.now()),
+                    type: item.type || "system",
+                    name: item.name || "App",
+                    icon: item.icon || "application-x-executable",
+                    defaultIcon: item.icon || "application-x-executable",
+                    cmdToggle: item.cmdToggle || "",
+                    isEnabled: item.enabled !== false
+                })
             }
         }
     }
 
     function updateOrder() {
         if (!_initialized) return;
-        let order = []
+        let arr = []
         for (let i = 0; i < listModel.count; ++i) {
             let item = listModel.get(i)
-            order.push(item.id + ":" + (item.isEnabled ? "1" : "0") + ":" + item.icon)
+            arr.push({
+                id: item.id,
+                type: item.type,
+                name: item.name,
+                icon: item.icon,
+                cmdToggle: item.cmdToggle,
+                enabled: item.isEnabled
+            })
         }
-        cfg_togglesOrder = order.join(",")
+        cfg_togglesOrder = JSON.stringify(arr)
     }
 
     ColumnLayout {
@@ -96,10 +127,30 @@ Item {
         anchors.margins: Kirigami.Units.largeSpacing
         spacing: Kirigami.Units.largeSpacing
         
-        Item { height: Kirigami.Units.largeSpacing } // Top margin spacer
+        RowLayout {
+            Layout.fillWidth: true
+            
+            Controls.Button {
+                text: "Add App / Command"
+                icon.name: "list-add"
+                onClicked: addDialog.open()
+            }
+            
+            Item { Layout.fillWidth: true }
+            
+            Controls.Button {
+                text: "Reset Defaults"
+                icon.name: "edit-undo"
+                onClicked: {
+                    cfg_togglesOrder = JSON.stringify(getDefaultJSON())
+                    _initialized = false
+                    initModel()
+                }
+            }
+        }
         
         Controls.Label {
-            text: "Click a toggle to enable/disable. Drag to reorder."
+            text: "Click a toggle to enable/disable. Drag to reorder. Right-click to change icon or delete."
             font.bold: true
             Layout.margins: Kirigami.Units.smallSpacing
         }
@@ -171,10 +222,10 @@ Item {
                             Kirigami.Icon {
                                 anchors.centerIn: parent
                                 source: model.icon
-                                isMask: true
+                                isMask: model.icon.endsWith("-symbolic")
                                 width: Kirigami.Units.iconSizes.medium
                                 height: width
-                                color: model.isEnabled ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor
+                                color: (isMask && model.isEnabled) ? Kirigami.Theme.highlightedTextColor : (isMask ? Kirigami.Theme.textColor : "transparent")
                             }
                         }
                         
@@ -207,6 +258,14 @@ Item {
                                 root.updateOrder()
                             }
                         }
+                        PlasmaComponents.MenuItem {
+                            text: "Delete Toggle"
+                            icon.name: "edit-delete"
+                            onClicked: {
+                                listModel.remove(index)
+                                root.updateOrder()
+                            }
+                        }
                     }
 
                     MouseArea {
@@ -226,7 +285,6 @@ Item {
                         
                         onPositionChanged: (mouse) => {
                             if (drag.active) {
-                                // Use the exact mouse position mapped to the GridView
                                 let pointInList = mapToItem(reorderList, mouse.x, mouse.y)
                                 let newIndex = reorderList.indexAt(pointInList.x, pointInList.y)
                                 if (newIndex !== -1 && newIndex !== index) {
@@ -236,10 +294,79 @@ Item {
                         }
                         
                         onReleased: {
-                            // Snap exactly back to origin when released
                             visualItem.x = 0
                             visualItem.y = 0
                             root.updateOrder()
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    PlasmaComponents.Dialog {
+        id: addDialog
+        title: "Add App or Command"
+        
+        ColumnLayout {
+            spacing: Kirigami.Units.largeSpacing
+            
+            Controls.Button {
+                text: "Browse System Apps..."
+                icon.name: "system-search"
+                Layout.fillWidth: true
+                onClicked: desktopAppDialog.open()
+            }
+            
+            Kirigami.FormLayout {
+                Controls.TextField {
+                    id: addNameField
+                    Kirigami.FormData.label: "Display Name:"
+                    placeholderText: "e.g., Firefox"
+                    Layout.fillWidth: true
+                }
+                Controls.TextField {
+                    id: addIconField
+                    Kirigami.FormData.label: "Icon Name:"
+                    placeholderText: "e.g., firefox"
+                    text: "application-x-executable"
+                    Layout.fillWidth: true
+                }
+                Controls.TextField {
+                    id: addCmdField
+                    Kirigami.FormData.label: "Command / Exec:"
+                    placeholderText: "e.g., firefox"
+                    Layout.fillWidth: true
+                }
+            }
+            
+            RowLayout {
+                Layout.alignment: Qt.AlignRight
+                Controls.Button {
+                    text: "Cancel"
+                    onClicked: addDialog.close()
+                }
+                Controls.Button {
+                    text: "Add"
+                    icon.name: "list-add"
+                    onClicked: {
+                        if (addNameField.text !== "" && addCmdField.text !== "") {
+                            listModel.append({
+                                id: "custom_" + Date.now(),
+                                type: "command",
+                                name: addNameField.text,
+                                icon: addIconField.text,
+                                defaultIcon: addIconField.text,
+                                cmdToggle: addCmdField.text,
+                                isEnabled: true
+                            })
+                            root.updateOrder()
+                            addDialog.close()
+                            
+                            // Reset fields
+                            addNameField.text = ""
+                            addIconField.text = "application-x-executable"
+                            addCmdField.text = ""
                         }
                     }
                 }
