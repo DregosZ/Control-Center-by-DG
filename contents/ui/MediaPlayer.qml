@@ -136,6 +136,8 @@ Item {
                         
                         property bool isLong: implicitWidth > parent.width && parent.width > 0
 
+                        onIsLongChanged: { if (!isLong) x = 0; }
+
                         SequentialAnimation on x {
                             loops: Animation.Infinite
                             running: titleLabel.isLong
@@ -145,8 +147,8 @@ Item {
                             PauseAnimation { duration: 2000 }
                             NumberAnimation {
                                 from: 0
-                                to: -(titleLabel.implicitWidth - titleLabel.parent.width)
-                                duration: (titleLabel.implicitWidth - titleLabel.parent.width) * 20
+                                to: titleLabel.isLong ? -(titleLabel.implicitWidth - titleLabel.parent.width) : 0
+                                duration: titleLabel.isLong ? (titleLabel.implicitWidth - titleLabel.parent.width) * 20 : 0
                             }
                             PauseAnimation { duration: 2000 }
                             // Snap back to start instead of scrolling backwards
@@ -174,6 +176,8 @@ Item {
                         
                         property bool isLong: implicitWidth > parent.width && parent.width > 0
 
+                        onIsLongChanged: { if (!isLong) x = 0; }
+
                         SequentialAnimation on x {
                             loops: Animation.Infinite
                             running: artistLabel.isLong
@@ -182,8 +186,8 @@ Item {
                             PauseAnimation { duration: 2000 }
                             NumberAnimation {
                                 from: 0
-                                to: -(artistLabel.implicitWidth - artistLabel.parent.width)
-                                duration: (artistLabel.implicitWidth - artistLabel.parent.width) * 20
+                                to: artistLabel.isLong ? -(artistLabel.implicitWidth - artistLabel.parent.width) : 0
+                                duration: artistLabel.isLong ? (artistLabel.implicitWidth - artistLabel.parent.width) * 20 : 0
                             }
                             PauseAnimation { duration: 2000 }
                             PropertyAction { value: 0 }
