@@ -166,71 +166,77 @@ Item {
                 }
             }
             
-            Controls.ComboBox {
+            Flow {
                 Kirigami.FormData.label: "Glass Tint Color:"
-                model: [
-                    { name: "None (Default)", value: "none", hex: "transparent" },
-                    { name: "Blue", value: "#007AFF", hex: "#007AFF" },
-                    { name: "Purple", value: "#5856D6", hex: "#5856D6" },
-                    { name: "Pink", value: "#FF2D55", hex: "#FF2D55" },
-                    { name: "Red", value: "#FF3B30", hex: "#FF3B30" },
-                    { name: "Orange", value: "#FF9500", hex: "#FF9500" },
-                    { name: "Yellow", value: "#FFCC00", hex: "#FFCC00" },
-                    { name: "Green", value: "#34C759", hex: "#34C759" },
-                    { name: "Teal", value: "#5AC8FA", hex: "#5AC8FA" },
-                    { name: "Mint", value: "#00C7BE", hex: "#00C7BE" },
-                    { name: "Indigo", value: "#3F51B5", hex: "#3F51B5" },
-                    { name: "Rose", value: "#E91E63", hex: "#E91E63" },
-                    { name: "Cyan", value: "#00BCD4", hex: "#00BCD4" },
-                    { name: "Emerald", value: "#2ECC71", hex: "#2ECC71" },
-                    { name: "Amethyst", value: "#9B59B6", hex: "#9B59B6" },
-                    { name: "Slate", value: "#607D8B", hex: "#607D8B" }
-                ]
-                textRole: "name"
-                valueRole: "value"
+                Layout.fillWidth: true
+                spacing: Kirigami.Units.smallSpacing
                 
-                currentIndex: {
-                    for (let i = 0; i < count; i++) {
-                        if (model[i].value === root.cfg_glassColor) return i;
-                    }
-                    return 0;
-                }
-                
-                onActivated: {
-                    root.cfg_glassColor = currentValue
-                }
-                
-                // Keep the closed state native to prevent text overlapping with the arrow!
-                // Only customize the dropdown list items.
-                delegate: Controls.ItemDelegate {
-                    width: parent.width
-                    highlighted: parent.highlightedIndex === index
+                Repeater {
+                    model: [
+                        { name: "None", value: "none" },
+                        { name: "Crimson", value: "#DC143C" },
+                        { name: "Red", value: "#FF3B30" },
+                        { name: "Rose", value: "#E91E63" },
+                        { name: "Pink", value: "#FF2D55" },
+                        { name: "Coral", value: "#FF7F50" },
+                        { name: "Orange", value: "#FF9500" },
+                        { name: "Amber", value: "#FFBF00" },
+                        { name: "Yellow", value: "#FFCC00" },
+                        { name: "Lemon", value: "#FFF44F" },
+                        { name: "Lime", value: "#32CD32" },
+                        { name: "Green", value: "#34C759" },
+                        { name: "Emerald", value: "#2ECC71" },
+                        { name: "Mint", value: "#00C7BE" },
+                        { name: "Teal", value: "#5AC8FA" },
+                        { name: "Cyan", value: "#00BCD4" },
+                        { name: "Sky", value: "#87CEEB" },
+                        { name: "Blue", value: "#007AFF" },
+                        { name: "Azure", value: "#007FFF" },
+                        { name: "Indigo", value: "#3F51B5" },
+                        { name: "Navy", value: "#000080" },
+                        { name: "Purple", value: "#5856D6" },
+                        { name: "Amethyst", value: "#9B59B6" },
+                        { name: "Violet", value: "#EE82EE" },
+                        { name: "Magenta", value: "#FF00FF" },
+                        { name: "Slate", value: "#607D8B" },
+                        { name: "Charcoal", value: "#36454F" }
+                    ]
                     
-                    // We must set the text to empty so the default label doesn't render!
-                    text: ""
-                    
-                    contentItem: RowLayout {
-                        spacing: Kirigami.Units.smallSpacing
-                        Rectangle {
-                            width: Kirigami.Units.iconSizes.small
+                    delegate: Rectangle {
+                        width: Kirigami.Units.gridUnit * 1.5
+                        height: width
+                        radius: width / 2
+                        color: modelData.value === "none" ? "transparent" : modelData.value
+                        border.color: root.cfg_glassColor === modelData.value ? Kirigami.Theme.highlightColor : Kirigami.Theme.textColor
+                        border.width: root.cfg_glassColor === modelData.value ? 2 : 1
+                        
+                        Kirigami.Icon {
+                            anchors.centerIn: parent
+                            source: modelData.value === "none" ? "list-remove" : "dialog-ok"
+                            width: parent.width * 0.7
                             height: width
-                            radius: width / 2
-                            color: modelData.hex === "transparent" ? Kirigami.Theme.backgroundColor : modelData.hex
-                            border.color: Kirigami.Theme.textColor
-                            border.width: 1
-                            
-                            Kirigami.Icon {
-                                anchors.centerIn: parent
-                                source: "list-remove"
-                                width: parent.width * 0.8
-                                height: width
-                                visible: modelData.value === "none"
-                            }
+                            visible: modelData.value === "none" || root.cfg_glassColor === modelData.value
+                            color: modelData.value === "none" ? Kirigami.Theme.textColor : "#FFFFFF"
                         }
-                        Controls.Label {
-                            text: modelData.name
-                            Layout.fillWidth: true
-                            color: parent.parent.highlighted ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: root.cfg_glassColor = modelData.value
+                            
+                            Controls.ToolTip.visible: containsMouse
+                            Controls.ToolTip.text: modelData.name
+                        }
+                        
+                        // Add a subtle scale animation on hover/selection
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        scale: (root.cfg_glassColor === modelData.value || hoverArea.containsMouse) ? 1.1 : 1.0
+                        
+                        MouseArea {
+                            id: hoverArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            acceptedButtons: Qt.NoButton
                         }
                     }
                 }
