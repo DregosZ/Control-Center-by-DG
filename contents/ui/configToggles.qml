@@ -145,6 +145,10 @@ Item {
                 to: 8
                 value: cfg_togglesColumns
                 onValueChanged: cfg_togglesColumns = value
+                textFromValue: function(value, locale) {
+                    if (value >= 7) return value + " (Fat Size)";
+                    return value;
+                }
             }
             
             Item { Layout.fillWidth: true }
