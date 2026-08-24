@@ -84,7 +84,6 @@ PlasmoidItem {
                     }
                 }
 
-                Item { Layout.fillHeight: true } // Spacer pushes everything up
 
                 GlassCard {
                     Layout.fillWidth: true
